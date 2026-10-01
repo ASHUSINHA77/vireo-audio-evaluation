@@ -42,3 +42,36 @@ By relying on deterministic, rule-based classification rather than opaque genera
 ---
 
 ## 🏗️ System Architecture
+
+┌───────────────────────────┐
+                                  │   Raw Support Datasets    │
+                                  │  (tickets.csv / agents)   │
+                                  └─────────────┬─────────────┘
+                                                │
+                                                ▼
+                                  ┌───────────────────────────┐
+                                  │   Schema Normalization    │
+                                  │   & Date Parsing Engine   │
+                                  └─────────────┬─────────────┘
+                                                │
+                       ┌────────────────────────┴────────────────────────┐
+                       ▼                                                 ▼
+        ┌─────────────────────────────┐                   ┌─────────────────────────────┐
+        │  Weekly Categorization      │                   │   Agent Workload Analysis   │
+        │  & Term Ranking             │                   │   & Channel Distribution    │
+        └──────────────┬──────────────┘                   └──────────────┬──────────────┘
+                       │                                                 │
+                       └────────────────────────┬────────────────────────┘
+                                                │
+                                                ▼
+                                  ┌───────────────────────────┐
+                                  │    HTML Render Engine     │
+                                  │   (BaseHTTPRequestHandler)│
+                                  └─────────────┬─────────────┘
+                                                │
+                       ┌────────────────────────┴────────────────────────┐
+                       ▼                                                 ▼
+        ┌─────────────────────────────┐                   ┌─────────────────────────────┐
+        │    Local Web Interface      │                   │     Static Report File      │
+        │   http://127.0.0.1:8765     │                   │       (report.html)         │
+        └─────────────────────────────┘                   └─────────────────────────────┘
