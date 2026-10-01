@@ -1,77 +1,27 @@
-<div align="center">
+# Vireo Support Signals
 
-# 🎧 Vireo Support Signals
+Small, local, dependency-free prototype for exploring support tickets. It reads `tickets.csv` and optional `agents.csv` from `data/`, produces weekly complaint summaries and an agent workload view, and never sends ticket text to a third party.
 
-**Local, Explainable Customer Support Signal Analysis & Workload Explorer**
+## Run
 
-![Python Version](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Dependencies](https://img.shields.io/badge/Dependencies-Zero%20(Standard%20Library)-success?style=for-the-badge)
-![Privacy](https://img.shields.io/badge/Privacy-100%25%20Local-blueviolet?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+Requires Python 3.9+; no package installation is needed.
 
-<p align="center">
-  A zero-dependency, local-first analytics engine designed to extract weekly customer complaint themes, rank recurring signal phrases, and evaluate agent workload contexts from raw support tickets—without sending data to third-party models or cloud APIs.
-</p>
+1. Put the supplied CSV files in `data/` (or run `python app.py --tickets path/to/tickets.csv --agents path/to/agents.csv`).
+2. Run `python app.py`.
+3. Open the local address printed in the terminal (default `http://127.0.0.1:8765`).
 
-[Key Features](#-key-features) • [Architecture](#-system-architecture) • [Quick Start](#-quick-start) • [Schema Mapping](#-column-detection--schema-mapping) • [Mathematical & Algorithmic Foundations](#-mathematical--algorithmic-foundations) • [Executive & CX Strategy](#-executive--cx-strategy)
+The input column names are detected from common names. If detection fails, add the actual header to the matching alias list near the top of `app.py`. Run `python app.py --help` for options.
 
-</div>
+## What it does
 
----
+- Groups tickets by week and assigns each opening message one explainable keyword-rule theme (connectivity, battery/charging, audio, fit, delivery, returns, setup, device fault, or other). It also surfaces frequent terms. This is a prototype classifier, not a claim that a generative model interpreted every ticket.
+- Shows tickets closed per agent alongside assignment count, ticket mix, and elapsed time where available. It is a workload view, not an individual performance ranking. Raw closed counts are not comparable without hours, shift, channel, complexity, tenure, and reopen context.
+- Shows missingness, duplicate IDs, date coverage, and a sample of source rows so an operator can check what the analysis is based on.
 
-## 📌 Executive Summary
+## Current limitations / evaluation
 
-**Vireo Support Signals** is built to give Customer Experience (CX) leaders, support managers, and operations analysts immediate, data-backed insights into incoming support tickets[cite: 4, 5]. 
+This workspace did not contain the Vireo data pack when this prototype was built. No Vireo-specific findings, financial estimates, or accuracy rates are asserted. Before operational use, map the actual columns, manually label a stratified sample of at least 200 tickets for theme and sentiment, and publish per-theme precision/recall plus the share of tickets that cannot be confidently assigned. Recheck monthly and after taxonomy changes. The app has no external model call; all text remains in the local process.
 
-By relying on deterministic, rule-based classification rather than opaque generative AI models, the application delivers audit-ready complaint categorization while ensuring **100% data privacy**. All customer interactions, timestamps, and agent metadata remain entirely local to your environment[cite: 5, 6].
+## Decisions and scope
 
----
-
-## ✨ Key Features
-
-| Feature | Description |
-| :--- | :--- |
-| 🛡️ **100% Local Processing** | Operates strictly in-memory using Python's standard library (`http.server`, `csv`, `re`, `json`). Zero network calls, zero telemetry[cite: 5, 6]. |
-| 🔍 **Deterministic Heuristic Classification** | Categorizes ticket opening messages into distinct complaint themes using explicit keyword matching[cite: 5, 6]. |
-| 📈 **Weekly Trend Digest** | Groups ticket volumes by calendar week, calculating relative percentage splits per complaint theme[cite: 5, 6]. |
-| 🔤 **Document Frequency-Weighted Phrase Scoring** | Identifies top recurring terms across ticket messages while automatically stripping common stop words[cite: 5, 6]. |
-| 👥 **Contextual Workload View** | Tracks closed and assigned tickets per agent alongside channel distribution without generating biased performance rankings[cite: 5, 6]. |
-| ⚙️ **Fuzzy Schema Matching** | Automatically normalizes and detects varying CSV header naming conventions across different support platforms[cite: 5, 6]. |
-| 💻 **Dual Output Modes** | Launches a lightweight HTTP dashboard (`http://127.0.0.1:8765`) or exports standalone static HTML reports[cite: 5, 6]. |
-
----
-
-## 🏗️ System Architecture
-
-┌───────────────────────────┐
-                                  │   Raw Support Datasets    │
-                                  │  (tickets.csv / agents)   │
-                                  └─────────────┬─────────────┘
-                                                │
-                                                ▼
-                                  ┌───────────────────────────┐
-                                  │   Schema Normalization    │
-                                  │   & Date Parsing Engine   │
-                                  └─────────────┬─────────────┘
-                                                │
-                       ┌────────────────────────┴────────────────────────┐
-                       ▼                                                 ▼
-        ┌─────────────────────────────┐                   ┌─────────────────────────────┐
-        │  Weekly Categorization      │                   │   Agent Workload Analysis   │
-        │  & Term Ranking             │                   │   & Channel Distribution    │
-        └──────────────┬──────────────┘                   └──────────────┬──────────────┘
-                       │                                                 │
-                       └────────────────────────┬────────────────────────┘
-                                                │
-                                                ▼
-                                  ┌───────────────────────────┐
-                                  │    HTML Render Engine     │
-                                  │   (BaseHTTPRequestHandler)│
-                                  └─────────────┬─────────────┘
-                                                │
-                       ┌────────────────────────┴────────────────────────┐
-                       ▼                                                 ▼
-        ┌─────────────────────────────┐                   ┌─────────────────────────────┐
-        │    Local Web Interface      │                   │     Static Report File      │
-        │   http://127.0.0.1:8765     │                   │       (report.html)         │
-        └─────────────────────────────┘                   └─────────────────────────────┘
+Prioritized a local, inspectable weekly signal tool and a contextual workload view. Deferred calibrated sentiment, root-cause causal analysis, agent ranking, cost-of-failure estimates, and integrations because the dataset and policy needed to substantiate them were unavailable. The intended operating goal is to select one preventable complaint after measuring its actual baseline and policy cost; a numeric target must not be invented from absent data.
